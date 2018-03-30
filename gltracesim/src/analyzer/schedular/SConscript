@@ -1,0 +1,30 @@
+#
+Import('simulator')
+Import('analyzer')
+
+_env = {}
+
+#
+simulator["objs"].extend([ simulator.SharedObject(x) for x in [
+
+]])
+
+#
+analyzer["objs"].extend([ analyzer.Object(x) for x in [
+    'base.cc',
+    'fcfs.cc',
+    'z.cc',
+    'random.cc',
+]])
+
+PROTO_SOURCES = [
+    'schedule.proto'
+]
+
+_env['proto'] = [
+    simulator.File(x) for x in PROTO_SOURCES
+]
+
+#
+Return('_env')
+

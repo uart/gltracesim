@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+import "stats/cache.proto";
+import "stats/distribution.proto";
+
+package gltracesim.proto;
+
+message BaseCacheStats {
+    //
+    uint32 frame_id = 1;
+    //
+    uint32 scene_id = 2;
+    //
+    gltracesim.proto.CacheStats cache_stats = 3;
+    //
+    gltracesim.proto.Distribution blk_utilization = 4;
+    //
+    gltracesim.proto.Distribution blk_reutilization = 5;
+}
+
+message BaseCacheCoreStats {
+    //
+    uint32 id = 1;
+    //
+    gltracesim.proto.CacheStats cache_stats = 2;
+}
+
+message BaseCacheJobStats {
+    //
+    uint32 id = 1;
+    //
+    gltracesim.proto.CacheStats cache_stats = 2;
+}
+
+message BaseCacheRscStats {
+    //
+    uint32 id = 1;
+    //
+    uint32 frame_id = 2;
+    //
+    uint32 scene_id = 3;
+    //
+    gltracesim.proto.CacheStats cache_stats = 4;
+}

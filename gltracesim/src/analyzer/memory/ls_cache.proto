@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package gltracesim.proto;
+
+message FrameCachelineUsers {
+    uint32 frame_id = 1;
+    uint64 addr = 2;
+    uint32 scene_users = 3;
+}
+
+message SceneCachelineUsers {
+    uint32 frame_id = 1;
+    uint32 scene_id = 2;
+    uint64 addr = 3;
+    uint32 task_users = 4;
+}

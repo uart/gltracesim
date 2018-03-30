@@ -1,0 +1,58 @@
+#!python
+
+#
+Import('simulator')
+Import('analyzer')
+
+_env = {}
+
+#
+simulator["objs"].extend([ simulator.SharedObject(x) for x in [
+    'job.cc',
+    'debug.cc',
+    'frame.cc',
+    'scene.cc',
+    'device.cc',
+    'system.cc',
+    'analyzer.cc',
+    'packet.cc',
+    'vmemory.cc',
+    'resource.cc',
+    'resource_jpeg.cc',
+    'resource_tracker.cc',
+    'gltracesim_generator.cc',
+]])
+
+#
+analyzer["objs"].extend([ analyzer.Object(x) for x in [
+    'job.cc',
+    'debug.cc',
+    'frame.cc',
+    'scene.cc',
+    'device.cc',
+    'system.cc',
+    'analyzer.cc',
+    'packet.cc',
+    'vmemory.cc',
+    'resource.cc',
+    'resource_jpeg.cc',
+    'resource_tracker.cc',
+    'gltracesim_analyzer.cc',
+]])
+
+PROTO_SOURCES = [
+    'opengl.proto',
+    'job.proto',
+    'scene.proto',
+    'frame.proto',
+    'resource.proto',
+    'gltracesim.proto'
+]
+
+_env['proto'] = [
+    simulator.File(x) for x in PROTO_SOURCES
+]
+
+#
+Return('_env')
+

@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package gltracesim.proto;
+
+message FrameInfo {
+    // Scene ID
+    uint32 id = 1;
+    // Scene ids
+    repeated uint32 scene = 2;
+}

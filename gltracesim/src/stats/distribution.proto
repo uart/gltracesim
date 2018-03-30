@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package gltracesim.proto;
+
+message Distribution {
+    // Number of samples
+    uint64 samples = 1;
+    // Number of underflows
+    uint64 underflows = 2;
+    // Number of overflows
+    uint64 overflows = 3;
+    // Distribution
+    repeated uint64 dist = 4;
+}

@@ -1,0 +1,12 @@
+src/
+.
+src/util
+ext/mesa/src/
+src/gem5
+src/generator
+src/generator/pipeline
+proto/
+src/analyzer
+src/analyzer/schedular
+src/analyzer/model
+src/analyzer/memory

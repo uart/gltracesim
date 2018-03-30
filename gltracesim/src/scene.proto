@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package gltracesim.proto;
+
+message SceneInfo {
+    // Scene ID
+    uint32 id = 1;
+    // Frame ID
+    uint32 frame_id = 2;
+    // Width [tiles]
+    uint32 width = 3;
+    // Height [tiles]
+    uint32 height = 4;
+    // Job ids
+    repeated uint32 job = 5;
+    // Job ids
+    repeated uint64 opengl_call = 6;
+}

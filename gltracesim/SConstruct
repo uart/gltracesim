@@ -1,0 +1,296 @@
+#!python
+
+import os, os.path, subprocess
+
+#
+vars = Variables()
+
+#
+vars.Add(EnumVariable(
+    'mode', 'Building mode', 'debug',
+    allowed_values=('debug', 'debug++', 'profile', 'release')
+    )
+)
+
+#
+simulator = Environment(
+    ENV=os.environ,
+    variables = vars,
+    tools = ['default', 'protoc'],
+)
+
+#
+analyzer = Environment(
+    ENV=os.environ,
+    variables = vars,
+    tools = ['default', 'protoc'],
+)
+
+#
+Help(vars.GenerateHelpText(simulator))
+Help(vars.GenerateHelpText(analyzer))
+
+# Root to external packages
+root = 'ext'
+
+#
+for dirname in os.listdir(root):
+  if os.path.isfile(os.path.join(root, dirname)):
+    continue
+
+  if "PIN_HOME" not in os.environ:
+    if dirname.startswith('pin-2'):
+      os.environ["PIN_HOME"] = os.path.abspath(os.path.join(root, dirname))
+
+  if "MESA_HOME" not in os.environ:
+    if dirname == 'mesa':
+      os.environ["MESA_HOME"] = os.path.abspath(os.path.join(root, dirname))
+
+  if "JSONCPP_HOME" not in os.environ:
+    if dirname.startswith('jsoncpp'):
+      os.environ["JSONCPP_HOME"] = os.path.abspath(os.path.join(root, dirname))
+
+def configure_gcc(env):
+
+  env.Append(CXXFLAGS = [
+      '-std=c++11', '-Wall', '-fPIC'
+  ])
+
+  if "CC" in os.environ:
+    env["CC"] = os.environ["CC"]
+  if "CXX" in os.environ:
+    env["CXX"] = os.environ["CXX"]
+
+configure_gcc(simulator)
+configure_gcc(analyzer)
+
+
+
+
+def configure_protobuf(env):
+
+  env.Append(LIBS = [ 'protobuf' ])
+  
+  # env.Append(CPPPATH = subprocess.check_output(["pkg-config", "--libs", "protobuf"]).split())
+  # env.Append(LIBS = subprocess.check_output(["pkg-config", "--cflags", "protobuf"]).split())
+
+  # print env['CPPPATH']
+  # print env['LIBS']
+
+  if "PROTO_HOME" in os.environ:
+    env.Prepend(CPPPATH = [
+      os.path.abspath(os.path.join(os.environ["PROTO_HOME"], 'include'))
+    ])
+    env.Prepend(LIBPATH = [
+      os.path.abspath(os.path.join(os.environ["PROTO_HOME"], 'lib'))
+    ])
+    env['ENV']['LD_LIBRARY_PATH'] = os.path.abspath(
+      os.path.join(os.environ["PROTO_HOME"], 'lib')
+    )
+    env["PROTOC"] = os.path.abspath(
+      os.path.join(os.environ["PROTO_HOME"], 'bin', 'protoc')
+    )
+
+configure_protobuf(simulator)
+configure_protobuf(analyzer)
+
+def libpng(flag):
+    res = subprocess.check_output(["libpng-config", "--%s" % flag]).split()
+    if flag == "ldflags":
+        for r in res:
+            if r.startswith("-l"):
+                return r
+
+    return res
+
+def configure_png(env):
+  env.Append(CPPPATH = libpng("cflags"))
+  env.Append(LIBS = libpng("ldflags"))
+
+configure_png(simulator)
+configure_png(analyzer)
+
+def configure_jpeg(env):
+  env.Append(LIBS = [ 'jpeg' ])
+
+configure_jpeg(simulator)
+configure_jpeg(analyzer)
+
+def configure_json(env):
+  env.Append(LIBS = [ 'jsoncpp' ])
+
+  if "JSONCPP_HOME" in os.environ:
+      env.Append(LIBS = [ 'jsoncpp' ])
+      env.Append(LIBPATH = [
+       os.path.join(os.environ["JSONCPP_HOME"], 'lib'),
+      ])
+
+configure_json(simulator)
+configure_json(analyzer)
+
+def configure_mesa(env):
+  env.Prepend(CPPPATH = [
+   os.path.join(os.environ["MESA_HOME"], 'include'),
+   os.path.join(os.environ["MESA_HOME"], 'src'),
+   os.path.join(os.environ["MESA_HOME"], 'src', 'gallium', 'include'),
+   os.path.join(os.environ["MESA_HOME"], 'src', 'gallium', 'auxiliary'),
+   os.path.join('#src'), os.path.join('#proto'),
+  ])
+
+  env.Append(LIBS = [
+   'gallium', 'mesautil', 'dl'
+  ])
+
+  env.Append(LIBPATH = [
+   os.path.join(os.environ["MESA_HOME"], 'build', 'linux-x86_64', 'util'),
+   os.path.join(os.environ["MESA_HOME"], 'build', 'linux-x86_64', 'gallium', 'auxiliary'),
+  ])
+
+  env.Append(CXXFLAGS = [
+   '-D__GLTRACESIM_GALLIUM_ON__=1'
+  ])
+
+configure_mesa(simulator)
+configure_mesa(analyzer)
+
+def configure_pin(env):
+  assert("pin-2" in os.environ["PIN_HOME"])
+
+  env.Append(LIBPATH = [
+   os.path.join(os.environ["PIN_HOME"], 'intel64', 'lib'),
+   os.path.join(os.environ["PIN_HOME"], 'intel64', 'lib-ext'),
+   os.path.join(os.environ["PIN_HOME"], 'intel64', 'runtime', 'glibc'),
+   os.path.join(os.environ["PIN_HOME"], 'extras', 'xed-intel64', 'lib'),
+   os.path.join(os.environ["PIN_HOME"], 'extras', 'xed-intel64', 'lib'),
+  ])
+
+  env.Prepend(CPPPATH = [
+   os.path.join(os.environ["PIN_HOME"], 'source', 'include', 'pin'),
+   os.path.join(os.environ["PIN_HOME"], 'source', 'include', 'pin', 'gen'),
+   os.path.join(os.environ["PIN_HOME"], 'extras', 'components', 'include'),
+   os.path.join(os.environ["PIN_HOME"], 'extras', 'xed-intel64', 'include'),
+  ])
+
+  env.Append(CXXFLAGS = [
+   '-Wno-unknown-pragmas', '-fno-stack-protector',
+   '-fomit-frame-pointer', '-fno-strict-aliasing',
+   '-fabi-version=2', '-D_GLIBCXX_USE_CXX11_ABI=0',
+   '-Wabi-tag', '-D__USING_PIN__=1',
+   '-DBIGARRAY_MULTIPLIER=1',  '-DTARGET_LINUX',
+   '-DTARGET_IA32E', '-DHOST_IA32E',
+   ])
+
+  env.Append(LINKFLAGS = [
+   '-shared', '-Wl,--hash-style=sysv', '-Wl,-Bsymbolic',
+   '-Wl,--version-script=%s' % os.path.join(
+      os.environ["PIN_HOME"], 'source', 'include', 'pin', 'pintool.ver'
+   )
+  ])
+
+  env.Append(LIBS = [
+      'pin', 'xed', 'dl', 'pindwarf',
+  ])
+
+configure_pin(simulator)
+
+# Todo, remove when all has been moved to gcc-5
+analyzer.Append(CXXFLAGS = [
+  '-fabi-version=2', '-D_GLIBCXX_USE_CXX11_ABI=0',
+  '-fno-builtin-malloc', '-fno-builtin-calloc',
+  '-fno-builtin-realloc', '-fno-builtin-free',
+])
+analyzer.Append(LIBS = [
+  'pthread',
+  'tcmalloc',
+])
+
+
+def configure_mode(env):
+  if env['mode'] == 'debug':
+      env.Append(CXXFLAGS = ['-g', '-O0', '-D__GLTRACESIM_DEBUG_ON__'])
+  elif env['mode'] == 'debug++':
+      env.Append(CXXFLAGS = ['-g', '-O3', '-march=native', '-D__GLTRACESIM_DEBUG_ON__'])
+  elif env['mode'] == 'release':
+      env.Append(CXXFLAGS = ['-O3', '-march=native'])
+      env.Append(LINKFLAGS = ['-s'])
+  elif env['mode'] == 'profile':
+      env.Append(CXXFLAGS = ['-pg', '-O0'])
+
+configure_mode(simulator)
+configure_mode(analyzer)
+
+#
+simulator_sources = [ ]
+analyzer_sources = [ ]
+
+#
+proto_sources = [ ]
+proto_paths = [ '#src' ]
+
+src_dirs = [ 'src' ]
+if "GLTRACESIM_EXT" in os.environ:
+  src_dirs.extend(os.environ["GLTRACESIM_EXT"].split(':'))
+
+def configure_extensions(env):
+  env.Append(CPPPATH = src_dirs)
+
+configure_extensions(simulator)
+configure_extensions(analyzer)
+
+simulator["objs"] = []
+analyzer["objs"] = []
+
+#
+for src in src_dirs:
+  for root, dirnames, filenames in os.walk(src):
+    for filename in filenames:
+      if filename in "SConscript":
+        sconscript = os.path.join(root, filename)
+        print sconscript
+
+        _env = SConscript(sconscript,
+          exports = [ 'simulator', 'analyzer' ],
+          variant_dir = 'build/' + simulator['mode'],
+          src_dir = 'src',
+          duplicate = 0
+        )
+
+        if 'proto' in _env:
+          proto_sources.extend(_env['proto'])
+          proto_paths.append(root)
+
+proto_files = []
+
+#
+for src in proto_sources:
+    proto_files.extend(analyzer.Protoc([ src ],
+        PROTOC_PATH=proto_paths,
+        PROTOC_CCOUT='#proto',
+        PROTOC_PYOUT='#proto',
+    ))
+
+#
+for src in simulator_sources + analyzer_sources:
+    Requires(src, proto_files)
+    Depends(src, proto_files)
+
+#
+for root, dirnames, filenames in os.walk('proto'):
+  # Create init file so we can load files from python
+  init_py = os.path.join(root, '__init__.py')
+  if not os.path.exists(init_py):
+    open(init_py, 'a').close()
+
+  for filename in filenames:
+    if filename.endswith('.pb.cc'):
+      simulator["objs"].append(
+        simulator.SharedObject(os.path.join(root, filename))
+      )
+      analyzer["objs"].append(
+        analyzer.Object(os.path.join(root, filename))
+      )
+
+#
+analyzer.Program(target='gltracesim-analyze.o', source=analyzer["objs"])
+simulator.SharedLibrary(target='gltracesim', source=simulator["objs"])
+

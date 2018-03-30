@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package gltracesim.proto;
+
+message VariableDistribution {
+
+    //
+    message Entry {
+
+        //
+        int64 entry = 1;
+        //
+        uint64 samples = 2;
+
+    }
+
+    //
+    uint64 samples = 1;
+    //
+    uint64 overflows = 2;
+    //
+    repeated Entry dist = 3;
+
+}

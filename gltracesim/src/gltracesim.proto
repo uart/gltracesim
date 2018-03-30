@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+import "resource.proto";
+
+package gltracesim.proto;
+
+message SimulationStats {
+    // Filter cache miss accesses
+    double duration = 1;
+    // Tot mops
+    uint64 tot_mops = 2;
+    // Resource mops
+    uint64 dev_mops = 3;
+    // Offcore Memory Ops
+    uint64 offcore_mops = 4;
+    //
+    uint64 opengl_calls = 5;
+}
+
+message Frame {
+    // Frame number
+    uint32 id = 1;
+
+    // In fast forward mode
+    bool fast_forwarded = 2;
+
+    //
+    SimulationStats sim_stats = 3;
+
+    //
+    repeated ResourceStats resource_stats = 4;
+}

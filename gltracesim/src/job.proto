@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package gltracesim.proto;
+
+enum JobType {
+    MISC_JOB = 0;
+    DRAW_JOB = 1;
+    TILE_JOB = 2;
+}
+
+message JobInfo {
+    // Resource ID
+    uint32 id = 1;
+    // Device ID [ CPU, GPU ]
+    uint32 dev_id = 2;
+    // Type
+    JobType type = 3;
+    // Frame ID
+    uint32 frame_id = 4;
+    // Scene ID
+    uint32 scene_id = 5;
+    // X-coord
+    uint32 x = 6;
+    // Y-coord
+    uint32 y = 7;
+}
+
+message ComputationStats {
+    // Instructions ID [XED Op Code]
+    uint32 opcode = 1;
+    // Instruction output width (bits)
+    uint32 width = 2;
+    // Number of invocations
+    uint64 count = 3;
+}
+
+message JobStats {
+    // Resource ID
+    uint32 id = 1;
+    // Executed Instructions
+    uint64 insts = 2;
+    // Number of read operations
+    uint64 reads = 3;
+    // Number of write operations
+    uint64 writes = 4;
+    // Detailed computation stats
+    repeated ComputationStats computation_stats = 5;
+}

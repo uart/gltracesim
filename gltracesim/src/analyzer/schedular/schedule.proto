@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package gltracesim.proto;
+
+enum SchedulePolicy {
+   SCHEDULE_FCFS = 0;
+   SCHEDULE_STRICT_ORDER = 1;
+}
+
+message Cluster {
+    // Cluster ID
+    uint32 id = 1;
+    //
+    SchedulePolicy policy = 2;
+    // Jobs
+    repeated uint32 job = 3;
+    //
+    uint32 footprint = 4;
+}
+
+message Schedule {
+    // Schdule ID
+    uint32 id = 1;
+    // Frame number
+    uint32 frame_id = 2;
+    // Scene number
+    uint32 scene_id = 3;
+    // Clusters
+    repeated uint32 cluster = 4;
+}
+
+message JobSchedule {
+    // Schdule ID
+    uint32 id = 1;
+    // Frame number
+    uint32 core_id = 2;
+}

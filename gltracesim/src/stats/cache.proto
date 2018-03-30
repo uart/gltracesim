@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package gltracesim.proto;
+
+message AccessTypeStats {
+    uint64 read = 1;
+    uint64 write = 2;
+    uint64 prefetch = 3;
+}
+
+message CacheStats {
+    // Cache ID
+    uint32 id = 1;
+
+    AccessTypeStats gpuside = 2;
+    AccessTypeStats memside = 3;
+
+    AccessTypeStats hits = 4;
+    AccessTypeStats misses = 5;
+
+    uint64 writebacks = 6;
+    uint64 evictions = 7;
+
+    AccessTypeStats intra_frame_hits = 8;
+    AccessTypeStats intra_scene_hits = 9;
+    AccessTypeStats intra_job_hits = 10;
+    AccessTypeStats intra_rsc_hits = 11;
+}

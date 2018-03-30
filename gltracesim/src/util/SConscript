@@ -1,0 +1,22 @@
+#
+Import('simulator')
+Import('analyzer')
+
+_env = {}
+
+#
+simulator["objs"].extend([ simulator.SharedObject(x) for x in [
+  'threads.cc',
+  'timer.cc',
+]])
+
+#
+analyzer["objs"].extend([ analyzer.Object(x) for x in [
+  'threads.cc',
+  'timer.cc',
+]])
+
+
+#
+Return('_env')
+

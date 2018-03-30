@@ -1,0 +1,16 @@
+#
+Import('simulator')
+Import('analyzer')
+
+_env = {}
+
+#
+simulator["objs"].extend([ simulator.SharedObject(x) for x in [
+  'analysis_queue.cc',
+  'filter_queue.cc',
+  'pipeline.cc',
+]])
+
+#
+Return('_env')
+

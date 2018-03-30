@@ -1,0 +1,31 @@
+#!python
+
+#
+Import('simulator')
+Import('analyzer')
+
+_env = {}
+
+#
+simulator["objs"].extend([ simulator.SharedObject(x) for x in [
+    'filter_cache.cc',
+    'buffer.cc',
+    'stop_timer.cc',
+]])
+
+#
+analyzer["objs"].extend([ analyzer.Object(x) for x in [
+
+]])
+
+PROTO_SOURCES = [
+
+]
+
+_env['proto'] = [
+    simulator.File(x) for x in PROTO_SOURCES
+]
+
+#
+Return('_env')
+

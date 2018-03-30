@@ -1,0 +1,288 @@
+#!/usr/bin/env python
+
+import json
+import os, os.path
+import subprocess
+
+def parse_arguments():
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser('gltracesim-generate')
+    option = parser.add_argument
+
+    option("-i", "--input-file", 
+        default='in.gltrace.',
+        help="Input trace file."
+    )
+
+    option("-n", "--num-gpu-threads", 
+        default=1,
+        type=int,
+        help="Numer of GPU renderer threads."
+    )
+
+    option("--num-analysis-threads", 
+        default=4,
+        type=int,
+        help="Number of analysis threads."
+    )
+
+    option("-f", "--start-frame", 
+        default=0,
+        type=int,
+        help="Fast forward N frames."
+    )
+
+    option("-d", "--debug-flags", 
+        default=[],
+        nargs='*',
+        help="Debug event flags."
+    )
+
+    option("--debug-level", 
+        default=0,
+        type=int,
+        help="Debug level."
+    )
+
+    option("-w", "--stop-frame", 
+        default=0,
+        type=int,
+        help="Frame to stop at."
+    )
+
+    option("--stop-time", 
+        default=0,
+        type=int,
+        help="Number of seconds to stop after."
+    )
+
+    option("--ignore-mem-ops", 
+        default=False,
+        action='store_true',
+        help="Ignore memory accesses."
+    )
+
+    option("--ignore-stack-ops", 
+        default=False,
+        action='store_true',
+        help="Ignore stack accesses."
+    )
+
+    option("-m", "--models", 
+        default=None,
+        help="Models parameter file."
+    )
+
+    option("-o", "--output-dir", 
+        default='out/',
+        help="Output directory."
+    )
+
+    option("--pin-flags", 
+        default='',
+        help="Extra pin flags."
+    )
+
+    option("--pin-tool-flags", 
+        default='',
+        help="Extra pin-tool flags."
+    )
+
+    option("--use-xvfb", 
+        default=False,
+        action='store_true',
+        help="Use Virtual Framebuffer."
+    )
+
+    option("--dump-trace", 
+        default=1,
+        type=int,
+        help="Dump access trace."
+    )
+
+    option("--xvfb-display", 
+        default=99,
+        type=int,
+        help="XVFB Display Number."
+    )
+
+    option("--filter-cache-size", 
+        default=2**15,
+        type=int,
+        help="Filter cache size."
+    )
+
+    option("--filter-cache-blk-size", 
+        default=64,
+        type=int,
+        help="Filter block size."
+    )
+
+    option("--filter-cache-associativity", 
+        default=4,
+        type=int,
+        help="Filter cache associativity."
+    )
+
+    option("--use-hardware-renderer", 
+        default=False,
+        action='store_true',
+        help="Use Virtual Framebuffer."
+    )
+
+    option("--dump-resources",
+        default=False,
+        action='store_true',
+        help="Sample GPU resources (e.g. png)."
+    )
+
+    option("--dump-scene-targets",
+        default=False,
+        action='store_true',
+        help="Dump GPU resources (e.g. png)."
+    )
+
+    option("--intrument-basic-blocks",
+        type=int,
+        default=1,
+        help="Instrument basic blocks for estimating compute."
+    )
+
+    option("--auto-prune-mem-insts",
+        default=False,
+        action='store_true',
+        help="Auto filter memory instructions that are not to GPU resources."
+    )
+
+    option("--auto-prune-mem-insts-threshold",
+        type=int,
+        default=1024,
+        help=""
+    )
+
+    return parser.parse_known_args()
+
+args, other_args = parse_arguments()
+
+#
+def main():
+
+    # Use hardware renderer
+    # For debugging, i.e. get ROI frame number
+    if args.use_hardware_renderer:
+        pass
+    else:
+        # Force MESA LLVMPipe SF renderer
+        os.environ['LIBGL_ALWAYS_SOFTWARE'] = "1"
+        os.environ['GALLIUM_DRIVER']        = "llvmpipe"
+        os.environ['LP_NUM_THREADS']        = "%i" % args.num_gpu_threads
+
+    debug_flags = []
+    for flag in args.debug_flags:
+        debug_flags.extend(flag.split(','))
+
+    # Build configuration
+    config = {
+
+        "start-frame": args.start_frame,
+        "stop-frame": args.stop_frame,
+
+        "stop-time": args.stop_time,
+
+        "num-gpu-threads": args.num_gpu_threads,
+        "num-analysis-threads": args.num_analysis_threads,
+
+        "ignore-mem-ops": args.ignore_mem_ops,
+        "ignore-stack-ops": args.ignore_stack_ops,
+
+        "intrument-basic-blocks": args.intrument_basic_blocks,
+        "auto-prune-mem-insts": args.auto_prune_mem_insts,
+        "auto-prune-mem-insts-threshold": args.auto_prune_mem_insts_threshold,
+
+        "dump-resources": args.dump_resources,
+        "dump-scene-targets": args.dump_scene_targets,
+        "dump-trace": args.dump_trace,
+
+        "debug": {
+            "enable": 1 if len(debug_flags) > 0 else 0,
+            "flags": debug_flags,
+            "level": args.debug_level,
+        },
+
+        "filter-cache": {
+            "size": args.filter_cache_size,
+            "associativity": args.filter_cache_associativity,
+            "blk-size": args.filter_cache_blk_size,
+            "fetch-on-wr-miss": False,
+        },
+    }
+
+    # Merge models file
+    config["models"] = []
+    if args.models:
+        for filename in args.models.split(','):
+            with open(filename, "r") as f:
+                config["models"].extend(json.load(f))
+
+    # Fix id
+    for i, model in enumerate(config["models"]):
+        model["id"] = i
+
+
+    # Make output directories
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
+
+    # Store configuration
+    with open(os.path.join(args.output_dir, "config.json"), "w") as f:
+        json.dump(config, f, indent=2, sort_keys=True)
+
+    # Build command
+    cmd = []
+
+    # XVFB cmd
+    if args.use_xvfb:
+        cmd += [
+            'xvfb-run', 
+            '--server-args="-screen 0 1920x1200x24+32 +extension GLX +render"',
+            '-n', str(args.xvfb_display),
+            '-a',
+            '-e', os.path.join(args.output_dir, 'xvfb.err')
+        ]
+
+    # Pin cmd
+    cmd += [os.path.join(os.environ['PIN_HOME'], 'pin')]
+    cmd += args.pin_flags.split()
+
+    # Tool cmd
+    cmd += [
+        '-t', os.path.join(
+            os.path.dirname(__file__),
+            'libgltracesim.so'
+        ),
+
+        # Out dir    
+        '-output_dir', args.output_dir,
+    ] 
+    cmd += args.pin_tool_flags.split()
+
+    # APITrace Replay
+    cmd +=  [
+        '--',
+        os.path.join(os.environ['APITRACE_HOME'], 'glretrace'), 
+        '-b',
+        args.input_file
+    ]
+
+    # Use string instead of [], for server-flags
+    cmd = ' '.join(cmd)
+
+    #
+    print cmd
+
+    # Run gltracesim
+    subprocess.call(cmd, shell=True)
+
+if __name__ == "__main__":
+    main()
