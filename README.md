@@ -25,9 +25,6 @@ See [uart/gltracesim] for more information.
 Start by cloning the following repository
 
     git clone https://github.com/uart/gltracesim.git
-    mkdir gltracesim/traces
-    mkdir gltracesim/gltracesim/ext
-    mkdir gltracesim/gltracesim/ext/local
     
 After that, you will see the following folder structure
 
