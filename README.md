@@ -63,7 +63,7 @@ Our tool has 3 components: a Pin-based Trace Generator (*gltracesim-generate*), 
 
 The GLTraceSim Generator feeds an OpenGL trace, and replays it using a software renderer. During this process, the memory accesses of the render threads are captured, along with plenty of other information, which is saved in a **GLTraceSim trace** (see [GLTraceSim Traces](#gltracesim-traces)).
 
-The GLTraceSim High Level Model (HLM onwards) replays the GLTraceSim traces to analyze cache/memory behavior. The Analyzer implements different types of caches with different configurations. While the GLTraceSim trace is replayed, the cache state is dumped over time to a specified folder to protobuffer files, which can be used later to compute Cache Miss Ratio Curved for different cache configurations.
+The GLTraceSim High Level Model (HLM onwards) replays the GLTraceSim traces to analyze cache/memory behavior. The Analyzer implements different types of caches with different configurations. While the GLTraceSim trace is replayed, the cache state is dumped over time to a specified folder to protobuffer files, which can be used for example to compute the cache miss ratios as a function of cache size.
 
 GLTraceSim's Gem5 Extension is an addition to the Gem5 Simulator that replays the GLTraceSim traces, feeding the memory access into Gem5's memory system, to obtain performance and bandwidth numbers of these applications running under a particular hardware architecture.
 
@@ -86,17 +86,32 @@ To build the High Level Model (analyzer)
 
 The following example generates a GLTraceSim trace from replaying an OpenGL trace for the benchmark *cnn*. The GLTraceSim trace is saved in `output/cnn`, and it is used in the succeeding examples for replaying using the High Level Model.
 
-    ./gltracesim-generate -i ../traces/cnn.gltrace -o ../output/cnn 
+    ./gltracesim-generate -i ../traces/cnn.gltrace -o ../output/gltracesim-traces/cnn 
     
 * `./gltracesim-generate` - GLTraceSim Trace Generator
 * `-i ../traces/cnn.gltrace` - input OpenGL trace for apitrace
 * `-o ../output/cnn` - output folder where the GLTraceSim trace is going to be saved 
 
+![gltracesim-generate-demo]
+
 ### 2. Replaying using the High Level Model
 
 The following command replayes the GLTraceSim trace of the *cnn* benchmark through the GLTraceSim High Level Model
 
-    ./gltracesim-analyze ... ... ... ...
+    ./gltracesim-analyze --schedular fcfs -i /path/to/input/traces/cnn -f 110 -w 112 -n 1 -m /path/to/gltracesim/config/base.json -o ../output/hlm-results/cnn -d Init,Warn,GpuEvent
+
+* `./gltracesim-analyze` - GLTraceSim Cache High Level Model
+* `-- schedular fcfs` - Tile scheduling policy (for tasks inside one scene). Choose between `FCFS`, `RANDOM` or `Z`.
+* `-i /path/to/input/traces/cnn` - input GLTraceSim trace
+* `-f 110` - fast forwards 110 frames (initialization)
+* `-w 112` - warmup until frame 112
+* `-n 1` - number of GPU multicores
+* `-m /path/to/gltracesim/config/base.json` - Cache configuration file (cache parameters)
+* `-o ../output/hlm-results/cnn` - output folder where the GLTraceSim HLM results are going to be saved
+* `-d Init,Warn,GpuFrameEvent` - debug/print events (verbosity). You can check the source files for all the different event types. In this case, this will print messages for the initialization, the warnings, and for each GpuFrame event.
+
+![gltracesim-analyze-demo]
+
 
 ### 3. Extracting data
 
@@ -118,7 +133,7 @@ For our previous example where the output folder was `output/cnn`, you will see 
     config.json
     output_schedule.pb.gz
     
-The prefix 0 indicates the core ID. Since we had a single core execution there is only 0 as prefix. If you replay with 4 cores, you will see multiple files 0.core_stats.pb.gz, 1.core_stats.pb.gz, etc.
+The prefix 0 indicates the core ID. Since we had a single core execution there is only 0 as prefix. If you replay with 4 cores, you will see multiple files `0.core_stats.pb.gz`, `1.core_stats.pb.gz`, etc.
 
 The files `orig.*.pb.gz` are a exact copy of the frames, scenes, jobs, resources and OpenGL calls from the traces used to replay. 
 
@@ -331,6 +346,9 @@ If you use GLTraceSim for your research, please cite [1] and [3].
 
 [uart]: http://www.it.uu.se/research/group/uart/
 [uart/gltracesim]: http://www.it.uu.se/research/group/uart/gltracesim
-[gltracesim-overview]: http://www.it.uu.se/research/group/uart/gltracesim_overview2.png
 
+
+[gltracesim-overview]: http://www.it.uu.se/research/group/uart/gltracesim_overview2.png
+[gltracesim-generate-demo]: http://www.it.uu.se/research/group/uart/gltracesim_generate_demo2.png
+[gltracesim-analyze-demo]: http://www.it.uu.se/research/group/uart/gltracesim_analyze_demo.png
 [gltracesim-traces]: https://www.dropbox.com/sh/a9khvc51krx8h6t/AAB3UUDLbHh_FONua-z-2xuta?dl=0
