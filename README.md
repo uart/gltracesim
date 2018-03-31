@@ -4,6 +4,8 @@ GLTraceSim is a graphics tracing and replay framework that enables to explore sy
 
 See [uart/gltracesim] for more information.
 
+![gltracesim-overview]
+
 ## Prerequisites
 
 ### C/C++
@@ -35,16 +37,16 @@ After that, you will see the following folder structure
                 tools
 * `config` -- Folder containing scripts to launch batch jobs over a set of traces.
 * `gltracesim` -- sources for GLTraceSim's trace generator and high level model
-* `traces` -- folder for the OpenGL calls trace files. You can get them [here], make sure to uncompress them under the `traces/` folder.
+* `traces` -- folder for the OpenGL calls trace files. You can get them [here](https://www.dropbox.com/sh/a9khvc51krx8h6t/AAB3UUDLbHh_FONua-z-2xuta?dl=0), make sure to uncompress them under the `traces/` folder.
 * `tools` -- sample scripts that process the output data. These scripts show how to extract the output data from the protobuffer files 
 
-GLTraceSim requires several external packages and libraries built and installed (see [External packages/libraries]. By default, the compilation scripts will assume all of them will be unpacked in `gltracessim/ext` and installed in `gltracesim/ext/local/`
+GLTraceSim requires several external packages and libraries built and installed (see [External packages and libraries](#external-packages-and-libraries). By default, the compilation scripts will assume all of them will be unpacked in `gltracessim/ext` and installed in `gltracesim/ext/local/`
 
 Feel free to change the installation directories, but make sure to set `APITRACE_HOME`, `JSONCPP_HOME`, `PROTO_HOME`, `MESA_HOME`, and `PYTHONPATH` accordingly for SCons to work. All these paths are defined in `gltracesime/conf.rc`. **Make sure to set up the** `BASE` and `BASE_LOCAL` **variables correctly in** `gltracesim/conf.rc` **file, and source it before using the tool.** You can do this by running:
 
     source /path/to/gltracesim/gltracesim/conf.rc
 
-### External packages/libraries
+### External packages and libraries
 
 * [apitrace]
         ```git clone https://github.com/apitrace/apitrace in ext/```
@@ -61,7 +63,7 @@ Our tool has 3 components: a Pin-based Trace Generator (*gltracesim-generate*), 
 
 The GLTraceSim Generator feeds an OpenGL trace, and replays it using a software renderer. During this process, the memory accesses of the render threads are captured, along with plenty of other information, which is saved in a **GLTraceSim trace** (see [GLTraceSim Traces](#gltracesim-traces)).
 
-The GLTraceSim High Level Model (HLM onwards) replays the GLTraceSim traces to analyze cache/memory behavior. The Analyzer implements different types of caches with different configurations. While the GLTraceSim trace is replayed, the cache state is dumped over time to a specified folder to protobuffer files, which can be used later to compute Cache Miss Ratio Curved for different cache configurations (see [Replay Results])
+The GLTraceSim High Level Model (HLM onwards) replays the GLTraceSim traces to analyze cache/memory behavior. The Analyzer implements different types of caches with different configurations. While the GLTraceSim trace is replayed, the cache state is dumped over time to a specified folder to protobuffer files, which can be used later to compute Cache Miss Ratio Curved for different cache configurations.
 
 GLTraceSim's Gem5 Extension is an addition to the Gem5 Simulator that replays the GLTraceSim traces, feeding the memory access into Gem5's memory system, to obtain performance and bandwidth numbers of these applications running under a particular hardware architecture.
 
@@ -239,10 +241,6 @@ You can use the script `resource-print.py` in the `tools` folder to display the 
     
 You can also use the resource-print script as a sample to extract the data from the GLTraceSim traces and use it for further analysis or processing.
 
-## Replay Results
-
-###
-
 ## Using the tools with launch scripts in *config/*
 
 Under the `config/` folder, we provided scripts to run both the trace generator and analyzer at once based on a list of traces (`traces.py`)
@@ -296,7 +294,7 @@ You can modify the `traces.py` file to include your own applications, or create 
 
 ## Publications using GLTraceSim 
 
-If you use GLTraceSim for your research, please cite [1,3].
+If you use GLTraceSim for your research, please cite [1] and [3].
 
 #### 2018
 
@@ -332,6 +330,7 @@ If you use GLTraceSim for your research, please cite [1,3].
 [Phoronix]: https://www.phoronix-test-suite.com
 
 [uart]: http://www.it.uu.se/research/group/uart/
-[uart/gltracesim]: http://www.it.uu.se/research/group/uart/gltracesim%20
+[uart/gltracesim]: http://www.it.uu.se/research/group/uart/gltracesim
+[gltracesim-overview]: http://www.it.uu.se/research/group/uart/gltracesim_overview2.png
 
 [gltracesim-traces]: https://www.dropbox.com/sh/a9khvc51krx8h6t/AAB3UUDLbHh_FONua-z-2xuta?dl=0
