@@ -86,7 +86,8 @@ To build the High Level Model (analyzer)
 
 The following example generates a GLTraceSim trace from replaying an OpenGL trace for the benchmark *cnn*. The GLTraceSim trace is saved in `output/cnn`, and it is used in the succeeding examples for replaying using the High Level Model.
 
-    ./gltracesim-generate -i ../traces/cnn.gltrace -o ../output/gltracesim-traces/cnn 
+    ./gltracesim-generate -i ../traces/cnn.gltrace \
+        -o ../output/gltracesim-traces/cnn \
     
 * `./gltracesim-generate` - GLTraceSim Trace Generator
 * `-i ../traces/cnn.gltrace` - input OpenGL trace for apitrace
@@ -98,7 +99,13 @@ The following example generates a GLTraceSim trace from replaying an OpenGL trac
 
 The following command replayes the GLTraceSim trace of the *cnn* benchmark through the GLTraceSim High Level Model
 
-    ./gltracesim-analyze --schedular fcfs -i /path/to/input/traces/cnn -f 110 -w 112 -n 1 -m /path/to/gltracesim/config/base.json -o ../output/hlm-results/cnn -d Init,Warn,GpuEvent
+    ./gltracesim-analyze --schedular fcfs \
+            -i /path/to/input/traces/cnn \
+            -f 110 -w 112 \
+            -n 1 \
+            -m /path/to/gltracesim/config/base.json \
+            -o ../output/hlm-results/cnn \
+            -d Init,Warn,GpuEvent
 
 * `./gltracesim-analyze` - GLTraceSim Cache High Level Model
 * `-- schedular fcfs` - Tile scheduling policy (for tasks inside one scene). Choose between `FCFS`, `RANDOM` or `Z`.
