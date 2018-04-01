@@ -320,11 +320,11 @@ If you use GLTraceSim for your research, please cite [1] and [3].
 
 #### 2018
 
-[3](https://www.researchgate.net/publication/323643947_Behind_the_Scenes_Memory_Analysis_of_Graphical_Workloads_on_Tile-based_GPUs) -- **Behind The Scenes: Analyzing Graphical Workloads on Task-Based GPUs**. Germán Ceballos, Andreas Sembrant, Trevor E. Carlson, and David Black-Schaffer. *In IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS'18)*.
+[3](https://www.researchgate.net/publication/323643947_Behind_the_Scenes_Memory_Analysis_of_Graphical_Workloads_on_Tile-based_GPUs) -- **Behind The Scenes: Memory Analysis of Graphical Workloads on Tile-Based GPUs**. Germán Ceballos, Andreas Sembrant, Trevor E. Carlson, and David Black-Schaffer. *In IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS'18)*.
 
 #### 2017
 
-[2](http://ieeexplore.ieee.org/document/8167761/) - **Analyzing Graphical Workloads on Task-Based GPUs**. Germán Ceballos, Andreas Sembrant, Trevor E. Carlson, and David Black-Schaffer. *In IEEE International Symposium on Workload Characterization (IISWC'17)*.
+[2](http://ieeexplore.ieee.org/document/8167761/) - **Analyzing Graphical Workloads on Tile-Based GPUs**. Germán Ceballos, Andreas Sembrant, Trevor E. Carlson, and David Black-Schaffer. *In IEEE International Symposium on Workload Characterization (IISWC'17)*.
 
 [1](http://ieeexplore.ieee.org/document/8167756/) - **A Graphics Tracing Framework for Exploring CPU+GPU Memory Systems**. Andreas Sembrant, Trevor E. Carlson, Erik Hagersten and David Black-Schaffer. *In IEEE International Symposium on Workload Characterization (IISWC'17)*.
 
